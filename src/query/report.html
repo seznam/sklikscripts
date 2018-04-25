@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+  </head>
+  <body>
+    <h2> Byly nalezeny nové vyhledávací dotazy </h2>    
+    <? for (var entityId in newQueries) { ?>
+    <h4> Nové dotazy pro <?= entityType+'['+entityId+']' ?> </h4>
+       <? for (var entity in newQueries[entityId]) { ?>
+          <? var query = newQueries[entityId][entity]; ?>
+          Dotaz: <b> <?= query.query ?></b> <i>[Klíčové slov: <?= query.keywordName ?> | ID: <?= query.keywordId ?> ] 
+          <a href="https://www.sklik.cz/campaigns/<?=query.campaignId?>/groups/<?=query.groupId?>/keywords/<?=query.keywordId?>/queries">-- ZOBRAZIT --</a> </i><br>
+       <? } ?>
+    <? } ?>
+   </body>
+</html>

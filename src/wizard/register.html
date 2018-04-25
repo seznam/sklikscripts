@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+  <base target="_top">
+  <script>
+    // Prevent forms from submitting.
+    function preventFormSubmit() {
+      var forms = document.querySelectorAll('form');
+      for (var i = 0; i < forms.length; i++) {
+        forms[i].addEventListener('submit', function (event) {
+          event.preventDefault();
+        });
+      }
+    }
+    window.addEventListener('load', preventFormSubmit);
+
+    function handleFormSubmit(formObject) {
+      var loader = document.getElementById('loader');
+      loader.style.display = "block";
+      document.getElementById('setup_form').style.display = 'none';
+      
+      
+      
+      var options = {
+        "user": {
+          "desc": "Nastavení: Uživatelské nastavení"
+        }        
+      };
+    
+      var t404 = (document.getElementById('t404Stat').value == 'true');
+      var query = (document.getElementById('queryStat').value == 'true');
+
+      var scriptOnList = [];
+      if (t404) {
+        options.t404 = {
+          "desc": "Test: Kontrola URL"
+        };
+      }
+
+      if (query) {
+        options.query = {
+          "desc": "Nové vyhledávací dotazy"
+        }
+      }
+
+      var inputs = formObject.elements;
+      for (var i = 0; i < inputs.length - 1; i++) {
+        var attr = inputs[i].attributes;
+        if ((attr.type != undefined && attr.type.nodeValue == 'hidden') || attr.oblock == undefined || options[attr.oblock.nodeValue] == undefined) {
+          continue;
+        }
+        var value = inputs[i].value;
+        if (attr.oType.nodeValue == 'boolean') {
+          if (inputs[i].checked) {
+            value = 'ANO';
+          } else {
+            value = 'NE';
+          }
+        }
+        options[attr.oblock.nodeValue][attr.name.nodeValue] = {
+          name: attr.name.nodeValue,
+          value: value,
+          type: attr.oType.nodeValue,
+          desc: attr.alt.nodeValue
+        }
+      }
+      google.script.run.withSuccessHandler(updateUrl).setupNewUser(options);
+    }
+    function updateUrl(response) {
+      var loader = document.getElementById('loader');
+      loader.style.display = "none";
+      var divOutput = document.getElementById('output');
+
+      if (response.fail) {
+        divOutput.innerHTML = 'Chyba při kopírování souborů';
+      } else {
+        var message = 'Scripty byly nastaveny, teď je třeba nastavit jejich spouštění: <br /><a href="' + response.setting + '" target="_blank">Otevřít nastavení</a> <br> ';
+        if(response.scripts.t404) {
+          message +='<a href="' + response.scripts.t404 + '" target="_blank">Otevřít script testu URL</a> <br>';
+        }
+        if(response.scripts.query) {
+          message +='<a href="' + response.scripts.query + '" target="_blank">Otevřít script nových vyhledávacích dotazů</a> <br>';
+        }
+        divOutput.innerHTML = message;
+      }
+    }
+
+    function enableScript(name) {
+      var block = document.getElementById(name);
+      var hidden = document.getElementById(name + 'Stat');
+      var button = document.getElementById(name + 'Button');
+      if (hidden.value == 'false') {
+        block.style.display = 'block';
+        hidden.value = 'true';
+        button.innerHTML = 'Vypnout';
+        button.classList.remove('btn-danger');
+        button.classList.add('btn-success');
+
+      } else {
+        block.style.display = 'none';
+        hidden.value = 'false';
+        button.innerHTML = 'Zapnout';
+        button.classList.add('btn-danger');
+        button.classList.remove('btn-success');
+      }
+    }
+
+    function enabler2() {
+        var opt = document.getElementById('entType');
+        if (opt.value != 'user') {
+          document.getElementById('repEntit').disabled = false;
+        } else { 
+          document.getElementById('repEntit').disabled = true; 
+        }
+      }
+
+  </script>
+</head>
+
+<body>
+  <div class="container">
+    <div class="row" style="background-color:red;">
+      <div class="col-xs-12 col-sm-4">
+        <img src="https://www.sklik.cz/hp-static/img/logo.svg" style="padding-top: 20px;">
+      </div>
+      <div class="col-xs-12 col-sm-8">
+        <h1>Sklik Script Wizard</h1>
+      </div>
+    </div>
+  </div>
+  <div class="container text-center" id="loader" style="display:none;">
+    <div class="row">
+      <div class="col-xs-12">
+        Vytvářím soubory
+        <br />
+        <img src="https://loading.io/spinners/square/index.square-grid-loader.gif">
+      </div>
+    </div>
+  </div>
+  <div class="container text-center" id="output">
+
+  </div>
+  <div class="container" id="setup_form">
+    <form id="registerF" onsubmit="handleFormSubmit(this)">
+      <div class="row">
+        <div class="col-xs-12">
+          <h4>Nastavení uživatele</h4>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-xs-12 col-sm-3">
+          Token:
+        </div>
+        <div class="col-xs-12 col-sm-4">
+          <input class="form-control" name="token" type="text" size="40" oType="str" oBlock="user" alt="Token pro přihlášení uživatele"
+          />
+        </div>
+        <div class="col-xs-12 col-sm-4">
+          Vyplňte token, který slouží k přihlášení do Skliku.
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-xs-12 col-sm-3">
+          Komunikační email
+        </div>
+        <div class="col-xs-12 col-sm-4">
+          <input class="form-control" name="reportEmail" type="text" oType="int" alt="Email pro zasilani reportu" oBlock="user" />
+        </div>
+        <div class="col-xs-12 col-sm-4">
+          Email, na který budou scripty posílat informace o dění (výsledy, chyby, upozornění atd..).
+        </div>
+      </div>
+
+
+
+
+      <div class="row">
+        <div class="col-xs-4">
+          <h4>Kontrola platnosti URL v účtu</h4>
+        </div>
+        <div class="col-xs-8">
+          <button class="btn btn-danger" onclick="enableScript('t404')" id='t404Button' type="button">Zapnout</button>
+        </div>
+        <input type="hidden" oBlock="t404" name="enabler" value="false" id="t404Stat">
+      </div>
+      <div id='t404' style='display:none;'>
+        <div class="row">
+          <div class="col-xs-12 col-sm-3">
+            Uživatelské IDs (oddělte |)
+          </div>
+          <div class="col-xs-12 col-sm-4">
+            <input class="form-control" name="userIds" type="text" size="40" value="|" oType="int" oBlock="t404" alt="ID účtů na kterých se zkontrolují URL"
+            />
+          </div>
+          <div class="col-xs-12 col-sm-4">
+            Seznam všech účtů, kterých se scripty budou týkat.
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xs-12 col-sm-3">
+            Konkrétní ID kampaní (oddělte |)
+          </div>
+          <div class="col-xs-12 col-sm-4">
+            <input class="form-control" name="t404campaignsIds" type="text" size="40" value="|" oType="int" oBlock="t404" alt="Kampaně na kterých se zkontroluji URL"
+            />
+          </div>
+          <div class="col-xs-12 col-sm-4">
+            Pokud vyplníte ID kampaní. Bude se vše kontrolovat jenom v jejich rámci (jako ID uživatele se bere první z nich).
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xs-12 col-sm-3">
+            Zasílání emailu
+          </div>
+          <div class="col-xs-12 col-sm-4">
+            <input class="form-control" name="t404email" type="checkbox" oType="boolean" oBlock="t404" alt="Zaslat email, i pokud bude vše v pořádku"
+            />
+          </div>
+          <div class="col-xs-12 col-sm-4">
+            Zaslat email, i pokud bude vše v pořádku.
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xs-12 col-sm-3">
+            Zkontrolovat u inzerátů
+          </div>
+          <div class="col-xs-12 col-sm-4">
+            <input class="form-control" name="t404ads" type="checkbox" oType="boolean" oBlock="t404" alt="URL v rámci inzerátů" />
+          </div>
+          <div class="col-xs-12 col-sm-4">
+            Prohledat URL obsažené v inzerátech.
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xs-12 col-sm-3">
+            Zkontrolovat u neschválených inzerátů
+          </div>
+          <div class="col-xs-12 col-sm-4">
+            <input class="form-control" name="t404adsDeny" type="checkbox" oType="boolean" oBlock="t404" alt="URL v rámci neschválených inzerátů"
+            />
+          </div>
+          <div class="col-xs-12 col-sm-4">
+            Prohledat URL obsažené v neschválených inzerátech.
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xs-12 col-sm-3">
+            Zkontrolovat u klíčových slov
+          </div>
+          <div class="col-xs-12 col-sm-4">
+            <input class="form-control" name="t404keywords" type="checkbox" oType="boolean" oBlock="t404" alt="URL v rámci klíčových slov"
+            />
+          </div>
+          <div class="col-xs-12 col-sm-4">
+            Prohledat URL obsažené v klíčových slovech
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xs-12 col-sm-3">
+            Zkontrolovat u sitelinků
+          </div>
+          <div class="col-xs-12 col-sm-4">
+            <input class="form-control" name="t404sitelinks" type="checkbox" oType="boolean" oBlock="t404" alt="URL v rámci sitelinků"
+            />
+          </div>
+          <div class="col-xs-12 col-sm-4">
+            Prohledat URL obsažené v sitelinkách
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-xs-12 col-sm-3">
+            Zahrnout bez záznamů za poslední měsíc
+          </div>
+          <div class="col-xs-12 col-sm-4">
+            <input class="form-control" name="t404empty" type="checkbox" oType="boolean" oBlock="t404" alt="Včetně záznamů, které nemají žádné zobrazeni"
+            />
+          </div>
+          <div class="col-xs-12 col-sm-4">
+            Zahrnout i inzeráty/sestavy/kampaně, které nemají žádné zobrazení za poslední měsíc.
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xs-12 col-sm-3">
+            Zahrnout pozastavené
+          </div>
+          <div class="col-xs-12 col-sm-4">
+            <input class="form-control" name="t404paused" type="checkbox" oType="boolean" oBlock="t404" alt="Včetně pozastavených inzerátů/kampaní/sestav"
+            />
+          </div>
+          <div class="col-xs-12 col-sm-4">
+            Zahrnout i inzeráty/sestavy/kampaně, které jsou aktuálně pozastavené.
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xs-12 col-sm-3">
+            Zahrnout smazané
+          </div>
+          <div class="col-xs-12 col-sm-4">
+            <input class="form-control" name="t404deleted" type="checkbox" oType="boolean" oBlock="t404" alt="Včetně smazaných inzerátů/kampaní/sestav"
+            />
+          </div>
+          <div class="col-xs-12 col-sm-4">
+            Zkontrolovat pouze inzeráty/sestavy/kampaně, které jsou smazané.
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-xs-4">
+          <h4>Alert nových vyhledávacích dotazů</h4>
+        </div>
+        <div class="col-xs-8">
+          <button class="btn btn-danger" onclick="enableScript('query')" id='queryButton' type="button">Zapnout</button>
+        </div>
+        <input type="hidden" oBlock="query" name="enabler" value="false" id="queryStat">
+      </div>
+
+      <div id='query' style='display:none;'>
+
+        <div class="row">
+          <div class="col-xs-12 col-sm-3">
+            Uživatelské ID
+          </div>
+          <div class="col-xs-12 col-sm-4">
+            <input class="form-control" name="queryUserId" type="text" size="40" oType="int" oBlock="query" alt="Id uživatele" />
+          </div>
+          <div class="col-xs-12 col-sm-4">
+            Vyplňte prosím ID účtu, který se má kontrolovat.
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xs-12 col-sm-3">
+            Typ entit
+          </div>
+          <div class="col-xs-12 col-sm-4">
+            <select class="form-control" oBlock="query" alt="Typ enity na kontrolu" oType="str" name="queryEntity" id="entType" onchange="enabler2()">
+              <option value="user">Celý účet</option>
+              <option value="campaign">Kampaně</option>
+              <option value="group">Skupiny</option>
+              <option value="keyword">Klíčová slova</option>
+            </select>
+          </div>
+          <div class="col-xs-12 col-sm-4">
+            Kterých entit se níže uvedené ID týkají.
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xs-12 col-sm-3">
+            ID Entit
+          </div>
+          <div class="col-xs-12 col-sm-4">
+            <input class="form-control" id="repEntit" name="queryEntityList" type="text" size="40" value="|" oType="int" oBlock="query" alt="Seznam ID entity ke kontrole" disabled/>
+          </div>
+          <div class="col-xs-12 col-sm-4">
+            Vyplňte token, který slouží k přihlášení do Skliku.
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-xs-12 col-sm-3">
+            Počet zobrazení
+          </div>
+          <div class="col-xs-6 col-sm-2">
+            <input class="form-control" name="impCount" type="text" value="0" oType="int" alt="Upozorňovat jenom, když je počet zobrazení větší, než udaná hodnota" oBlock="query" />
+          </div>
+          <div class="col-xs-12 col-sm-4">
+            Upozorňuje, jenom na entity, které dosáhnou více zobrazení, než je stanovená hodnota.
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-xs-12 col-sm-3">
+            Počet prokliků
+          </div>
+          <div class="col-xs-6 col-sm-2">
+            <input class="form-control" name="clickCount" type="text" value="0" oType="int" alt="Upozorňovat jenom, když je počet prokliků větší, než udaná hodnota" oBlock="query" />
+          </div>
+          <div class="col-xs-12 col-sm-4">
+            Upozorňuje jenom na entity, které dosáhnou více prokliků, než je stanovená hodnota.
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-xs-12 col-sm-3">
+            Počet konverzí
+          </div>
+          <div class="col-xs-6 col-sm-2">
+            <input class="form-control" name="convCount" type="text" value="0" oType="int" alt="Upozorňovat jenom, když je počet konverzí větší, než udaná hodnota." oBlock="query" />
+          </div>
+          <div class="col-xs-12 col-sm-4">
+            Upozorňuje jenom na entity, které dosáhnou více konverzí, než je stanovená hodnota.
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <br />
+        <br />
+        <div class="col-xs-3">
+
+        </div>
+        <div class="col-xs-4">
+          <input class="btn btn-success btn-block" type="submit" value="Vytvořit script" />
+        </div>
+      </div>
+      <!-- <div class="row">
+        <div class="col-xs-12 col-sm-3">
+        </div>
+        <div class="col-xs-12 col-sm-4">
+        </div>
+        <div class="col-xs-12 col-sm-4">
+        </div>
+      </div> -->
+    </form>
+  </div>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+</body>
+
+</html>
