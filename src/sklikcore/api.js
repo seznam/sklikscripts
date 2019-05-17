@@ -72,33 +72,38 @@ var APIConnection = function (rSetup, rLogger) {
      * @param {Object} cbClass - Callback class
      * @param {string} cbMethod - Callback method
      * @param {mixed} param - variable params insert into callback 
+     * @param {int} retry - try same query one more time
      */
-    this.sklikApi = function (parameters, method, cbClass, cbMethod, param, retry) {
-      if(method.indexOf('client.') == -1) {
-        this.logger.addEvent(method + '[SklikApiCore.APIConnection.sklikApi]');
-        this.logger.addEvent(method + JSON.stringify(parameters) + '[SklikApiCore.APIConnection.sklikApi]');
-      }
-      //Jenom abych nezasypal API dotazy, proto pred kazdym volani to na chvili uspim
-      Utilities.sleep(200);
-      try {
-        var stat = UrlFetchApp.fetch('https://api.sklik.cz/jsonApi/drak/' + method, {
+  this.sklikApi = function (parameters, method, cbClass, cbMethod, param, retry) {
+    if (retry == undefined) {
+      retry = 1;
+    } else {
+      retry = retry + 1;
+    }
+
+    if (method.indexOf('client.') == -1) {
+      this.logger.addEvent(method + '[SklikApiCore.APIConnection.sklikApi]');
+      this.logger.addEvent(method + JSON.stringify(parameters) + '[SklikApiCore.APIConnection.sklikApi]');
+    }
+    //Jenom abych nezasypal API dotazy, proto pred kazdym volani to na chvili uspim
+    Utilities.sleep(200);
+    try {
+      var stat = UrlFetchApp.fetch('https://api.sklik.cz/drak/json/' + method, {
         'method': 'post',
         'contentType': 'application/json',
         'muteHttpExceptions': true,
         'payload': JSON.stringify(parameters)
-       }); 
-      } catch (e) {
-        if (!retry) {
-          Utilities.sleep(2000);
-          return this.sklikApi(parameters, method, cbClass, cbMethod, param, true); 
-        }
-      }    
+      });
       var response = JSON.parse(stat);
       var text = JSON.stringify(response);
+      if (response == undefined || response.status == undefined || text == undefined) {
+        throw 'Have no status message';
+      }
       if (text.length > 400) {
-        text = text.substring(0,400)+"SHORTED ";
+        text = text.substring(0, 400) + "SHORTED ";
       }
       this.logger.addEvent(method + text + '[SklikApiCore.APIConnection.sklikApi]');
+
       if (stat && stat.getResponseCode() == 200) {
         if (response.session) {
           if (cbClass) {
@@ -113,15 +118,24 @@ var APIConnection = function (rSetup, rLogger) {
           this.logger.addEvent(method + ' Nevraci session [sklikApi]');
           return false;
         }
-      //Pokud to failne, tak to zkusim provolat znova za 2 sekundy  
-      } else if (!retry) {
+        //Pokud to failne, tak to zkusim provolat znova za 2 sekundy  
+      } else if (retry < 5 || retry == undefined) {
         Utilities.sleep(2000);
-        return this.sklikApi(parameters, method, cbClass, cbMethod, param, true);    
+        return this.sklikApi(parameters, method, cbClass, cbMethod, param, retry);
       } else {
-        this.logger.addEvent(method + ' [' + response.status+'] - [sklikApi]');
+        this.logger.addEvent(method + ' [' + response.status + '] - [sklikApi]');
+        return false;
+      }
+
+    } catch (e) {
+      if (retry < 5) {
+        Utilities.sleep(2000);
+        return this.sklikApi(parameters, method, cbClass, cbMethod, param, retry);
+      } else {
         return false;
       }
     }
+  } 
   }
   
   
