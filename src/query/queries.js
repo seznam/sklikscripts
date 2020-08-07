@@ -170,8 +170,7 @@ var Queries = function (rSetup, rLogger, rApi, rHeap, rEmail) {
         this.api.sklikApi(
             [{ 'session': this.api.getSession(), 'userId': this.getUserId() },
                 restriction,
-            { "statGranularity": 'total' },
-            { 'source': "NewQueries" }],
+            { "statGranularity": 'total' }],
             'queries.createReport',
             this,
             'readReport'

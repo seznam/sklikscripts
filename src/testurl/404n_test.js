@@ -373,7 +373,7 @@ var TestUrl = function (RootClass) {
   
       //Sklik ads
       if (!this.Root.rApi.sklikApi([{ 'session': this.Data.getSession(), 'userId': this.Data.getActualUser() },
-        restriction, { 'source': "Test404ads" }
+        restriction
       ],
         'ads.createReport',
         this,
@@ -465,7 +465,7 @@ var TestUrl = function (RootClass) {
   
   
       if (!this.Root.rApi.sklikApi([{ 'session': this.Data.getSession(), 'userId': this.Data.getActualUser() },
-        restriction, { 'source': "Test404adsdeny" }
+        restriction
       ],
         'ads.createReport',
         this,
@@ -553,7 +553,7 @@ var TestUrl = function (RootClass) {
       restriction = this.getStatConditions(restriction, 'keywords');
   
       if (!this.Root.rApi.sklikApi([{ 'session': this.Data.getSession(), 'userId': this.Data.getActualUser() },
-        restriction,{ 'source': "Test404keywords" }
+        restriction
       ],
         'keywords.createReport',
         this,
@@ -635,7 +635,7 @@ var TestUrl = function (RootClass) {
       restriction = this.getStatConditions(restriction, 'sitelinks');
   
       if (!this.Root.rApi.sklikApi([{ 'session': this.Data.getSession(), 'userId': this.Data.getActualUser() },
-        restriction, { 'source': "Test404sitelinks" }
+        restriction
       ],
         'sitelinks.createReport',
         this,
