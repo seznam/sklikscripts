@@ -7,8 +7,8 @@ Actual version is first stabile version: 1.0.0
 # Inicializační wizard
 *Wizard se za vás postará o vytvoření složek, nahrání skriptů nebo o uložení nastavení. Stačí ho spustit, vyplnit nastavení a povolit mu práci ve vašich složkách na Google Drive. Celý proces jsme popsali v tomto dokumentu.*
 
-**Sklik Wizard v1.0.0**
-Adresa wizardu: https://script.google.com/macros/s/AKfycbzrSBHETg9KoBNDrwdZPbfBB0Lay70QdblirFomfM4G2dzsLs8L/exec
+**Sklik Wizard v1.1.0**
+Adresa wizardu: https://script.google.com/macros/s/AKfycbw69GvMN9b8Fs6RiKJ8pT_7koaH8k6k8JY5kYOOXZEqxphZG4-9hYAtAW68vrvJnLV-/exec
 
 Po spuštění je třeba schválit pár bezpečnostních upozornění a kontrol od Googlu. 
 ![](https://raw.githubusercontent.com/seznam/sklikscripts/master/wiki/manual_01.jpg?token=AH71AfnNNdAzjzAyDdDy24TQGLDMZEO-ks5bH4CkwA%3D%3D)
