@@ -86,7 +86,7 @@ var Wizard = function () {
           var file = DriveApp.getFileById(FILE_SCRIPT_TESTURL);
           this.fileScript.t404 = file.makeCopy('TestUrl');
           folder.addFile(this.fileScript.t404);
-          DriveApp.removeFile(file);
+          //DriveApp.removeFile(file);
           this.fileScriptUrl.t404 = this.fileScript.t404.getUrl();
         } catch (e) {
           this.fileScript.t404 = false;
@@ -98,7 +98,7 @@ var Wizard = function () {
           var file = DriveApp.getFileById(TEST_QUERY);
           this.fileScript.query = file.makeCopy('NewQueryCheck');
           folder.addFile(this.fileScript.query);
-          DriveApp.removeFile(file);
+          //DriveApp.removeFile(file);
           this.fileScriptUrl.query = this.fileScript.query.getUrl();
         } catch (e) {
           this.fileScript.query = false;
@@ -117,7 +117,7 @@ var Wizard = function () {
         var file = DriveApp.getFileById(FILE_SETTING_ID);
         this.fileSetting = file.makeCopy('gSetting');
         folder.addFile(this.fileSetting);
-        DriveApp.removeFile(file);
+        //DriveApp.removeFile(file);
         return true;
       } catch (e) {
         return false;
